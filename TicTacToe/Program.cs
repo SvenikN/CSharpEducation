@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Runtime.CompilerServices;
 class TicTacToe
 {
     static string[] pole = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
@@ -20,15 +20,14 @@ class TicTacToe
             string input = Console.ReadLine();
             Console.ForegroundColor = originalColor;
 
-            // Проверка корректности хода
             validInput = int.TryParse(input, out int steps) && steps >= 1 && steps <= 9 && pole[steps - 1] != "X" && pole[steps - 1] != "O";
             if (validInput)
             {
                 pole[steps - 1] = (player == 1) ? "X" : "O";
                 top = ++top;
                 DrawPole();
-                if (IsChampion(player)) break; // Проверка победной комбинации хода
-                if (top == 9) // Проверка на ничью
+                if (IsChampion(player)) break;
+                if (top == 9)
                 {
                     Console.WriteLine($"У вас ничья!");
                     break;
@@ -44,19 +43,24 @@ class TicTacToe
         }
     }
 
-    // Отрисовка поля
+    /// <summary>
+    /// Отрисовка поля
+    /// </summary>
     static void DrawPole()
     {
+        const string s = "|";
+        const string p = "----------";
+
         Console.WriteLine();
-        Console.WriteLine($"{pole[0]} | {pole[1]} | {pole[2]}");
-        Console.WriteLine($"----------");
-        Console.WriteLine($"{pole[3]} | {pole[4]} | {pole[5]}");
-        Console.WriteLine($"----------");
-        Console.WriteLine($"{pole[6]} | {pole[7]} | {pole[8]}");
+        Console.WriteLine($"\t {pole[0]} {s} {pole[1]} {s} {pole[2]} \n\t {p}");
+        Console.WriteLine($"\t {pole[3]} {s} {pole[4]} {s} {pole[5]} \n\t {p}");
+        Console.WriteLine($"\t {pole[6]} {s} {pole[7]} {s} {pole[8]}");
         Console.WriteLine();
     }
 
-    // Проверка победной комбинации хода
+    /// <summary>
+    /// Проверка победной комбинации
+    /// </summary>
     static bool IsChampion(int player)
     {
         if (((pole[0] == pole[1]) && (pole[1] == pole[2])) ||
