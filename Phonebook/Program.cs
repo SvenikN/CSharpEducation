@@ -1,4 +1,6 @@
-﻿using Phonebook;
+﻿using System;
+using System.Collections.Generic;
+using Phonebook;
 using System.Text.Json;
 namespace Phonebook;
 
@@ -6,9 +8,9 @@ class Program
 {
     public static void Main(string[] args)
     {
-        var phonebook = new Phonebook();
-        List<Abonent> abonents = phonebook.ReadFile();
+        Phonebook phonebook = Phonebook.GetInstance();
         bool prog = true;
+        List<Abonent> abonent = new List<Abonent>();
 
         while (prog)
         {
@@ -17,19 +19,57 @@ class Program
 
             switch (bar)
             {
-                case 1: phonebook.PrintAbonent(abonents);
+                case 1:
+                    { 
+                        abonent = phonebook.PrintAbonent();
+                        if (abonent.Count != 0)
+                            foreach (Abonent ab in abonent)
+                                Console.WriteLine($"Name: {ab.Name}, Number: {ab.Number}");
+                        
+                        else Console.WriteLine("Список абонентов пуст");
+                    }
                     break;
-                case 2: phonebook.CreateAbonent(abonents);
+                case 2:
+                    {
+                        Console.Write($"Name - ");
+                        string name = Console.ReadLine();
+
+                        Console.Write($"Number - ");
+                        string number = Console.ReadLine();
+
+                        phonebook.CreateAbonent(name, number);
+                        Console.WriteLine("Абонент создан");
+                    }
                     break;
-                case 3: phonebook.DeleteAbonent(abonents);
+                case 3:
+                    {
+                        Console.Write("Введите имя которое нужно удалить - ");
+                        string nameDel = Console.ReadLine();
+                        phonebook.DeleteAbonent(nameDel);
+                        Console.WriteLine("Абонент удален");
+                    }
                     break;
-                case 4: phonebook.SearchName(abonents);
+                case 4:
+                    {
+                        Console.Write("Введите имя для поиска - ");
+                        string names = Console.ReadLine();
+                        abonent = phonebook.SearchName(names);
+                        foreach (Abonent ab in abonent)
+                            Console.WriteLine($"{ab.Name} {ab.Number}");
+                    }
                     break;
-                case 5: phonebook.SearhNumber(abonents);
+                case 5:
+                    {
+                        Console.Write("Введите номер для поиска - ");
+                        string numbers = Console.ReadLine();
+                        abonent = phonebook.SearhNumber(numbers);
+                        foreach (Abonent ab in abonent)
+                            Console.WriteLine($"{ab.Name} {ab.Number}");
+                    }
                     break;
                 case 6:
                     {
-                        phonebook.WriteFile(abonents);
+                        phonebook.WriteFile();
                         Console.WriteLine("Файл сохранен");
                         prog = false;
                     }
@@ -40,13 +80,14 @@ class Program
     }
 
     #region
+
     /// <summary>
     /// Вывести меню в консоль
     /// </summary>
     static void Bar()
     {
         Console.WriteLine(@" Меню:
-        1. Вывести все абоненты
+        1. Вывести всех абонентов
         2. Создать абонента
         3. Удалить абонента
         4. Найти абонента по имени

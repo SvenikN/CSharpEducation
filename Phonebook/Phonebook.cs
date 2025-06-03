@@ -11,10 +11,15 @@ namespace Phonebook
     public class Phonebook
     {
         private static Phonebook instance;
-        public static string path = @"D:\CSharpEducation\phonebook.txt";
+        private string path = (Directory.GetCurrentDirectory() + "\\phonebook.txt");
 
-        public Phonebook()
-        { }
+        private List<Abonent> abonents;
+
+        private Phonebook()
+        {
+            abonents = new List<Abonent>();
+            abonents = ReadFile();
+        }
 
         public static Phonebook GetInstance()
         {
@@ -24,122 +29,106 @@ namespace Phonebook
         }
 
         #region
+
         /// <summary>
         /// Вывести из файла всех абонентов при запуске программы
         /// </summary>
         public List<Abonent> ReadFile()
         {
+            ExistsFile();
+            List<Abonent> abonents = null;
             string line;
             using (StreamReader read = new StreamReader(path))
             {
                 line = read.ReadToEnd();
-
             }
-            List<Abonent>? abonents = JsonSerializer.Deserialize<List<Abonent>>(line);
 
-            foreach (Abonent abonent in abonents)
-                Console.WriteLine($"Name: {abonent.Name}, Number: {abonent.Number}");
+            if (!string.IsNullOrEmpty(line))
+            {
+                abonents = JsonSerializer.Deserialize<List<Abonent>>(line);
+            }
 
+            return abonents ?? new List<Abonent>();
+        }
+        #endregion
+
+        private void ExistsFile()
+        {
+            if (!Directory.Exists(path))
+                using (FileStream file = new FileStream(path, FileMode.OpenOrCreate));
+        }
+
+        #region
+
+        /// <summary>
+        /// Вывести список абонентов
+        /// </summary>
+        public List<Abonent> PrintAbonent()
+        {
             return abonents;
         }
         #endregion
 
         #region
-        /// <summary>
-        /// Вывести список абонентов
-        /// </summary>
-        /// <param name="abonents">Список всех абонентов</param>
-        public void PrintAbonent(List<Abonent> abonents)
-        {
-            foreach (var abonent in abonents)
-                Console.WriteLine($"Name: {abonent.Name}, Number: {abonent.Number}");
-        }
-        #endregion
 
-        #region
         /// <summary>
         /// Добавить в список нового абонента
         /// </summary>
-        public void CreateAbonent(List<Abonent> abonents)
+        public void CreateAbonent(string name, string number)
         {
-            Console.Write($"Name - ");
-            string name = Console.ReadLine();
-
-            Console.Write($"Number - ");
-            string number = Console.ReadLine();
-
             if ((abonents.Any(ab => ab.Name == name)) && (abonents.Any(ab => ab.Number == number)))
-                Console.WriteLine("Абонент с таким именем и номером уже существует");
+                throw new Exception("Абонент с таким именем и номером уже существует");
             else abonents.Add(new Abonent(name, number));
         }
         #endregion
 
         #region
+
         /// <summary>
         /// Удаление абонента
         /// </summary>
-        /// <param name="abonents"></param>
-        public void DeleteAbonent(List<Abonent> abonents)
+        public void DeleteAbonent(string nameDel)
         {
-            Console.Write("Введите имя которое нужно удалить - ");
-            string nameDel = Console.ReadLine();
-
             abonents.RemoveAll(a => a.Name == nameDel);
-            Console.WriteLine("Абонент удален");
         }
         #endregion
 
         #region
+
         /// <summary>
         /// Поиск по имени
         /// </summary>
-        /// <param name="abonents">Список всех абонентов</param>
-        public void SearchName(List<Abonent> abonents)
+        public List<Abonent> SearchName(string names)
         {
-            Console.Write(@"Введите имя для поиска - ");
-            string names = Console.ReadLine();
-            bool search = false;
+            var list = abonents.Where(a => a.Name.Contains(names)).ToList();
 
-            foreach (Abonent abonent in abonents)
-                if (abonent.Name.Contains(names))
-                {
-                    Console.WriteLine($"{abonent.Name} {abonent.Number}");
-                    search = true;
-                }
-            if (!search)
-                Console.WriteLine("Имя не найдено");
+            if (list.Count == 0)
+                throw new ArgumentException("Абонент не найден", nameof(names));
+            return list;
         }
         #endregion
 
         #region
+
         /// <summary>
         /// Поиск по номеру
         /// </summary>
-        /// <param name="abonents">Список всех абонентов</param>
-        public void SearhNumber(List<Abonent> abonents)
+        public List<Abonent> SearhNumber(string numbers)
         {
-            Console.Write(@"Введите номер для поиска - ");
-            string numbers = Console.ReadLine();
-            bool search = false;
+            var list = abonents.Where(a => a.Number.Contains(numbers)).ToList();
 
-            foreach (Abonent abonent in abonents)
-                if (abonent.Number == numbers)
-                { 
-                    Console.WriteLine($"{abonent.Name} {abonent.Number}");
-                    search = true;
-                }
-            if (!search)
-                Console.WriteLine("Номер не найден");
-            
+            if (list.Count == 0)
+                throw new ArgumentException("Абонент не найден", nameof(numbers));
+            return list;
         }
         #endregion
 
         #region
+
         /// <summary>
         /// Запись всех абонентов в файл, после закрытия программы
         /// </summary>
-        /// <param name="abonents">список всех абонентов</param>
-        public void WriteFile(List<Abonent> abonents)
+        public void WriteFile()
         {
             FileInfo fileInf = new FileInfo(path);
             if (fileInf.Exists)
